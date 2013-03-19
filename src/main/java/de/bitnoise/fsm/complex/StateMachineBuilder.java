@@ -3,10 +3,7 @@ package de.bitnoise.fsm.complex;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.bitnoise.fsm.complex.StateMachineBuilder.OnBuilder;
-import de.bitnoise.fsm.complex.StateMachineBuilder.StateBuilder;
 import de.bitnoise.fsm.simple.FsmAction;
-import de.bitnoise.fsm.simple.PrintAction;
 
 public class StateMachineBuilder
 {
