@@ -1,26 +1,43 @@
 package de.bitnoise.fsm.complex;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import de.bitnoise.fsm.complex.StateMachineBuilder.StateBuilder;
 import de.bitnoise.fsm.simple.FsmAction;
 
 public class StateMachineBuilder
 {
-  public static StateBuilder state(String name)
+  public static StateBuilder state(String name,FsmAction ... onStateActions)
   {
-    return new StateBuilder(new BuilderState()).state(name);
+    return new StateBuilder(new BuilderState()).state(name,onStateActions);
   }
 
-  public static StateBuilder state(State newState)
+  public static StateBuilder state(State newState,FsmAction ... onStateActions)
   {
-    return new StateBuilder(new BuilderState()).state(newState);
+    return new StateBuilder(new BuilderState()).state(newState,onStateActions);
   }
+  
+  public static StateBuilder startState(State newState,FsmAction ... onStateActions)
+  {
+    return new StateBuilder(new BuilderState()).startState(newState,onStateActions);
+  }
+  
+  public static StateBuilder startState(String name,FsmAction ... onStateActions)
+  {
+    return new StateBuilder(new BuilderState()).startState(name,onStateActions);
+  }
+
 
   static class BuilderState
   {
     StateBuilder _stateBuilder;
     Map<String, State> states = new HashMap<String, State>();
+    State _startState;
+    List<FsmAction> _onEventListeners;
 
     public void setBuilder(StateBuilder stateBuilder)
     {
@@ -36,6 +53,15 @@ public class StateMachineBuilder
         states.put(name, s);
       }
       return s;
+    }
+
+    public void setOnStateListeners(FsmAction[] listeners)
+    {
+      _onEventListeners=new ArrayList<FsmAction>();
+      if(listeners!=null) 
+      {
+        _onEventListeners.addAll(Arrays.asList(listeners));
+      }
     }
   }
 
@@ -53,18 +79,31 @@ public class StateMachineBuilder
       table = new HashMap<State, Map<String, NextState>>();
     }
 
-    public StateBuilder state(String name)
+    public StateBuilder state(String name,FsmAction ...onStateActions)
     {
       State newState = _state.findState(name);
-      return state(newState);
+      return state(newState,onStateActions);
+    }
+    
+    public StateBuilder startState(String name,FsmAction ...onStateActions)
+    {
+      State newState = _state.findState(name);
+      return startState(newState,onStateActions);
     }
 
-    public StateBuilder state(State newState)
+    public StateBuilder state(State newState,FsmAction ...onStateActions)
     {
       events = new HashMap<String, NextState>();
+      newState.setOnStateActions(onStateActions);
       table.put(newState, events);
       _state.states.put(newState.toString(), newState);
       return this;
+    }
+    
+    public StateBuilder startState(State newState,FsmAction ...onStateActions)
+    {
+      _state._startState=newState;
+      return state(newState,onStateActions);
     }
 
     public OnBuilder on(String... eventList)
@@ -79,7 +118,15 @@ public class StateMachineBuilder
 
     public StateMachine createStateMachine()
     {
-      return new StateMachine(_state._stateBuilder.table);
+      StateMachine machine = new StateMachine(_state._startState,_state._stateBuilder.table);
+      machine.setGlobalOnStateActions(_state._onEventListeners);
+      return machine;
+    }
+
+    public StateBuilder setOnStateListeners(FsmAction ... listeners)
+    {
+      _state.setOnStateListeners(listeners);
+      return _state._stateBuilder;
     }
 
   }
@@ -145,6 +192,17 @@ public class StateMachineBuilder
     {
       return _state._stateBuilder.state(newState);
     }
+
+    public StateBuilder state(String name,FsmAction ...onStateActions)
+    {
+      return _state._stateBuilder.state(name, onStateActions);
+    }
+
+    public StateBuilder builder()
+    {
+      return _state._stateBuilder.builder();
+    }
   }
+
 
 }

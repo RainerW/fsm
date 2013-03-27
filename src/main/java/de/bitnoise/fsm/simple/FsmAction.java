@@ -1,8 +1,8 @@
 package de.bitnoise.fsm.simple;
 
-public interface FsmAction
+public interface FsmAction<E extends FsmEvent<?>>
 {
 
-  void doAction(FsmEvent eventObj);
+  void doAction(E eventObj);
 
 }

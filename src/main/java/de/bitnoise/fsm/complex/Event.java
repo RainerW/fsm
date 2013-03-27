@@ -2,7 +2,7 @@ package de.bitnoise.fsm.complex;
 
 import de.bitnoise.fsm.simple.FsmEvent;
 
-public class Event<T extends Object> implements FsmEvent
+public class Event<T extends Object> implements FsmEvent<T>
 {
   String _eventName;
 
@@ -17,6 +17,10 @@ public class Event<T extends Object> implements FsmEvent
   {
     _eventName = eventName;
     _payload = plyload;
+  }
+  
+  public void setPayload(T payload) {
+    _payload = payload;
   }
 
   public String getEventName()

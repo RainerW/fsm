@@ -10,12 +10,19 @@ import de.bitnoise.fsm.simple.FsmEvent;
 
 public class StateMachine
 {
-
   Map<State, Map<String, NextState>> transitions;
+
   Map<String, State> trans2;
 
-  public StateMachine(Map<State, Map<String, NextState>> table)
+  State _startState;
+
+  String GENERIC_START_EVENT = "generic-start-of-stateMachine-event";
+
+  List<FsmAction> _globalOnStateActions;
+
+  public StateMachine(State startState, Map<State, Map<String, NextState>> table)
   {
+    _startState = startState;
     transitions = table;
     trans2 = new HashMap<String, State>();
     for (Entry<State, Map<String, NextState>> entry : transitions.entrySet())
@@ -26,12 +33,28 @@ public class StateMachine
     }
   }
 
+  public String start(FsmEvent event)
+  {
+    if (_startState != null)
+    {
+      executActions(_globalOnStateActions, event);
+      executActions(_startState.getOnStateActions(), event);
+    }
+    return _startState.toString();
+  }
+
+  public String start()
+  {
+    Event<Object> event = new Event<Object>(GENERIC_START_EVENT);
+    return start(event);
+  }
+
   public State event(String stateName, String event)
   {
     return event(trans2.get(stateName), event);
   }
-  
-  public State event(String stateName, FsmEvent  event)
+
+  public State event(String stateName, FsmEvent event)
   {
     return event(trans2.get(stateName), event);
   }
@@ -43,8 +66,8 @@ public class StateMachine
 
   public State event(State currentState, FsmEvent eventObj)
   {
-    System.out.println("from State : " + currentState);
-    System.out.println("  on Event : " + eventObj);
+    debug("from State : " + currentState);
+    debug("  on Event : " + eventObj);
     String event = eventObj.getEventName();
     Map<String, NextState> state = transitions.get(currentState);
     if (state == null)
@@ -56,14 +79,34 @@ public class StateMachine
     {
       noTransitionFound(currentState, event);
     }
-    List<FsmAction> actions = transition.getDoAction();
-    for (FsmAction action : actions)
-    {
-      action.doAction(eventObj);
-    }
+
+    executActions(transition.getDoAction(), eventObj);
+
     State nextState = transition.getNextState();
-    System.out.println("  to State : " + nextState);
+    debug("  to State : " + nextState);
+    if (!currentState.equals(nextState))
+    {
+      executActions(_globalOnStateActions, eventObj);
+      executActions(nextState.getOnStateActions(), eventObj);
+    }
     return nextState;
+  }
+
+  @Deprecated // remove this or replace by logger
+  protected void debug(String msg)
+  {
+//    System.out.println(msg);
+  }
+
+  protected void executActions(List<FsmAction> actions, FsmEvent eventObj)
+  {
+    if (actions != null)
+    {
+      for (FsmAction action : actions)
+      {
+        action.doAction(eventObj);
+      }
+    }
   }
 
   /**
@@ -82,6 +125,11 @@ public class StateMachine
   {
     throw new IllegalStateException("There are no transitions from the State '" + currentState
         + "' on event :" + event);
+  }
+
+  public void setGlobalOnStateActions(List<FsmAction> actions)
+  {
+    _globalOnStateActions = actions;
   }
 
 }
