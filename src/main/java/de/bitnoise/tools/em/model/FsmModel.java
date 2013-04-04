@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.bitnoise.tools.em.EMAction;
+import de.bitnoise.tools.em.EMErrorHandler;
 
 public class FsmModel
 {
@@ -16,12 +17,19 @@ public class FsmModel
 
   String _startStateName;
 
+  EMErrorHandler _errorHandler;
+
+  public EMErrorHandler getErrorHandler()
+  {
+    return _errorHandler;
+  }
+
   public FsmState addStartState(String stateName, EMAction... actions)
   {
     _startStateName = stateName;
     return addState(stateName, actions);
   }
-  
+
   public FsmState addState(String stateName, EMAction... actions)
   {
     FsmState state = states.get(stateName);
@@ -62,6 +70,11 @@ public class FsmModel
   public String getStartStateName()
   {
     return _startStateName;
+  }
+
+  public void addErrorHandler(EMErrorHandler errorHandler)
+  {
+    _errorHandler = errorHandler;
   }
 
 }

@@ -16,12 +16,30 @@ public class EventMachine
   {
     _model = model;
   }
-  
+
   public String getStartStateName()
   {
     return _model.getStartStateName();
   }
 
+  public String start(EMState initialState)
+  {
+    String newState = getStartStateName();
+    FsmState state = _model.getState(newState);
+    if (state == null)
+    {
+      throwNewIllegalStateException(initialState, null, "Initial State is unknown, " + newState);
+    }
+    EMEventImpl event = new EMEventImpl("-generic-initial-start-event-");
+    executActions(initialState, _model.getOnStateListeners(), event);
+    executActions(initialState, state.getOnStateActions(), event);
+    return newState;
+  }
+
+  public String start()
+  {
+    return start(null);
+  }
 
   public String event(String stateName, String eventName)
   {
@@ -35,29 +53,35 @@ public class EventMachine
     FsmState state = _model.getState(currentStateName);
     if (state == null)
     {
-      throwNewIllegalStateException("Current State is unknown. " + currentStateName);
+      throwNewIllegalStateException(currentState, event,
+          "Current State is unknown. " + currentStateName);
     }
 
     FsmTransition transtion = state.getTransitionFor(eventName);
     if (transtion == null)
     {
-      throwNewIllegalStateException("No Transition for Event '" + eventName + "' in state '" + currentStateName + "' known.");
-    }
-
-    executActions(currentState, transtion.getActions(), event);
-
-    String nextStateName = transtion.getNextState();
-    FsmState nextState = _model.getState(nextStateName);
-
-    if (!currentStateName.equals(nextStateName))
+      throwNewIllegalStateException(currentState, event,
+          "No Transition for Event '" + eventName + "' in state '"
+              + currentStateName + "' known.");
+      return "-illegal-state-reached-";
+    } 
+    else 
     {
-      executActions(currentState, _model.getOnStateListeners(), event);
-      if (nextState != null)
+      executActions(currentState, transtion.getActions(), event);
+  
+      String nextStateName = transtion.getNextState();
+      FsmState nextState = _model.getState(nextStateName);
+  
+      if (!currentStateName.equals(nextStateName))
       {
-        executActions(currentState, nextState.getOnStateActions(), event);
+        executActions(currentState, _model.getOnStateListeners(), event);
+        if (nextState != null)
+        {
+          executActions(currentState, nextState.getOnStateActions(), event);
+        }
       }
+      return nextStateName;
     }
-    return nextStateName;
   }
 
   protected void executActions(EMState currentState, List<EMAction> actions, EMEvent eventObj)
@@ -68,9 +92,14 @@ public class EventMachine
     }
   }
 
-  protected void throwNewIllegalStateException(String msg)
+  protected void throwNewIllegalStateException(EMState state, EMEvent event, String msg)
   {
-    throw new IllegalStateException(msg);
+    EMErrorHandler handler = _model.getErrorHandler();
+    if (handler == null)
+    {
+      throw new IllegalStateException(msg);
+    }
+    handler.handleTransitionError(state, event, msg);
   }
 
 }
