@@ -1,9 +1,8 @@
 package de.bitnoise.tools.em.impl;
 
 import de.bitnoise.tools.em.EMEvent;
-import de.bitnoise.tools.em.EMState;
 
-public class EMEventImpl implements EMEvent<EMState>
+public class EMEventImpl implements EMEvent
 {
   String _eventName;
 

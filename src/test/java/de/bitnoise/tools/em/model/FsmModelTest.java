@@ -1,22 +1,19 @@
 package de.bitnoise.tools.em.model;
 
-import static org.fest.assertions.Assertions.*;
+import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
+import de.bitnoise.tools.em.EMAction;
 import de.bitnoise.tools.em.EMEvent;
 import de.bitnoise.tools.em.EMState;
-import de.bitnoise.tools.em.EMAction;
-import de.bitnoise.tools.em.model.FsmModel;
-import de.bitnoise.tools.em.model.FsmState;
-import de.bitnoise.tools.em.model.FsmTransition;
 
 public class FsmModelTest
 {
-  EMAction aAction = new EMAction<EMState, EMEvent<?>>()
+  EMAction aAction = new EMAction<EMState, EMEvent>()
   {
     @Override
-    public void doAction(EMState currentState, EMEvent<?> eventObj)
+    public void doAction(EMState currentState, EMEvent eventObj)
     {
     }
   };
@@ -57,7 +54,7 @@ public class FsmModelTest
     FsmState state = sut.addState("START");
 
     // execute
-    state.addTransition("NEXT", new String[] {"Event1", "Event2"}, new EMAction[] {aAction});
+    state.addTransition("NEXT", new String[] { "Event1", "Event2" }, new EMAction[] { aAction });
 
     // verify
     FsmTransition transition1 = state.getTransitionFor("Event1");

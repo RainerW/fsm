@@ -8,24 +8,23 @@ import de.bitnoise.fsm.complex.StateMachineBuilder.StateBuilder;
 import de.bitnoise.fsm.simple.PrintAction;
 
 /**
+ * Plant uml state diagram
  * 
- * Plant uml state diagram <code>
+ * <pre>
  * 
  * @startuml
+ *   [*] -> START
  * 
- *           [*] -> START
+ *   START -down-> STARTING: START STARTING -> ERROR: SEND-MAIL-ERROR
+ *   STARTING -down-> STARTED : SEND-MAIL-SUCCESS STARTED -down->
+ *   LINKOPEN : CONFIG-LINK-OPENED
  * 
- *           START -down-> STARTING: START STARTING -> ERROR: SEND-MAIL-ERROR
- *           STARTING -down-> STARTED : SEND-MAIL-SUCCESS STARTED -down->
- *           LINKOPEN : CONFIG-LINK-OPENED
- * 
- *           ERROR_SAVE -> LINKOPEN : CONFIG-LINK-OPENED LINKOPEN -> LINKOPEN :
- *           CONFIG-LINK-OPENED LINKOPEN -> LINKOPEN :CANCEL LINKOPEN -down->
- *           SAVING :SAVED SAVING -> ERROR_SAVE : SEND-MAIL-ERROR SAVING -down->
- *           SUCCESS :SEND-MAIL-SUCCESS SUCCESS-> [*] ERROR-> [*]
- * @enduml </code>
- * 
- * 
+ *   ERROR_SAVE -> LINKOPEN : CONFIG-LINK-OPENED LINKOPEN -> LINKOPEN :
+ *   CONFIG-LINK-OPENED LINKOPEN -> LINKOPEN :CANCEL LINKOPEN -down->
+ *   SAVING :SAVED SAVING -> ERROR_SAVE : SEND-MAIL-ERROR SAVING -down->
+ *   SUCCESS :SEND-MAIL-SUCCESS SUCCESS-> [*] ERROR-> [*]
+ * @enduml
+ * </pre>
  */
 public class ComplexSample
 {
@@ -37,26 +36,25 @@ public class ComplexSample
   static State saving = new FsmStateImpl("saving");
   static State success = new FsmStateImpl("success");
   static State error = new FsmStateImpl("error");
-  
+
   static StateBuilder fsb = StateMachineBuilder
-          .state(start)
-             .on("START").goTo(starting)
-          .state(starting)
-             .on("SEND-MAIL-ERROR")   .goTo(error)       .then( new PrintAction("sending subscription mail") )           
-             .on("SEND-MAIL-SUCCESS") .goTo(started)     .then( new PrintAction("sending subscription mail succeeded"))
-          .state(started)
-             .on("CONFIG-LINK-OPENED").goTo(linkOpened)  .then( new PrintAction("user opend link from mail") )   
-          .state(errorOnSave)
-             .on("CONFIG-LINK-OPENED").goTo(linkOpened)  .then( new PrintAction("user opend link from mail") )   
-          .state(linkOpened)
-             .on("CONFIG-LINK-OPENED","CANCEL").goTo(linkOpened)
-             .on("SAVED")             .goTo(saving)      .then( new PrintAction("sending mail with new account") )
-          .state(saving)
-             .on("SEND-MAIL-ERROR")   .goTo(errorOnSave) .then( new PrintAction("Confirmation mail send with error") )
-             .on("SEND-MAIL-SUCCESS") .goTo(success)     .then( new PrintAction("Confirmation mail send sucessfully") )
-          .builder()
-          ;
-  
+      .state(start)
+      .on("START").goTo(starting)
+      .state(starting)
+      .on("SEND-MAIL-ERROR").goTo(error).then(new PrintAction("sending subscription mail"))
+      .on("SEND-MAIL-SUCCESS").goTo(started).then(new PrintAction("sending subscription mail succeeded"))
+      .state(started)
+      .on("CONFIG-LINK-OPENED").goTo(linkOpened).then(new PrintAction("user opend link from mail"))
+      .state(errorOnSave)
+      .on("CONFIG-LINK-OPENED").goTo(linkOpened).then(new PrintAction("user opend link from mail"))
+      .state(linkOpened)
+      .on("CONFIG-LINK-OPENED", "CANCEL").goTo(linkOpened)
+      .on("SAVED").goTo(saving).then(new PrintAction("sending mail with new account"))
+      .state(saving)
+      .on("SEND-MAIL-ERROR").goTo(errorOnSave).then(new PrintAction("Confirmation mail send with error"))
+      .on("SEND-MAIL-SUCCESS").goTo(success).then(new PrintAction("Confirmation mail send sucessfully"))
+      .builder();
+
 //  static StateMachine fsm = new StateMachine(new Object[][] {// @formatter:off
 //      // from          event      to         action 
 //      {start      , "START"                 , starting   , new PrintAction("sending subscription mail")},
@@ -73,7 +71,7 @@ public class ComplexSample
 
   public static void main(String[] args)
   {
-    StateMachine fsm = fsb.createStateMachine(); 
+    StateMachine fsm = fsb.createStateMachine();
     // user requests 2 subscribe
     // so we send an mail
     State state = fsm.event(start, "START");

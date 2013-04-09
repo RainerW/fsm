@@ -2,7 +2,8 @@ package de.bitnoise.tools.em;
 
 public interface EMState
 {
+  String getStateMemento();
 
-  String getStateName();
+  void setStateMemento(String data);
 
 }

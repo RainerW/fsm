@@ -2,13 +2,15 @@ package de.bitnoise.tools.em;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import de.bitnoise.tools.em.impl.EMStateImpl;
 import de.bitnoise.tools.em.model.FsmModel;
 
-public class EventMachineTest
+public class MethodsAsActionsTest
 {
+
   MyAction a1 = new MyAction();
   MyAction a2 = new MyAction();
   MyAction a3 = new MyAction();
@@ -22,23 +24,77 @@ public class EventMachineTest
 
   MyAction l0 = new MyAction();
 
-  EventMachine fsm;
+  protected void a1(EMState state, EMEvent evt)
   {
+    a1.doAction(state, evt);
+  }
+
+  protected void a2(EMState state, EMEvent evt)
+  {
+    a2.doAction(state, evt);
+  }
+
+  protected void a3(EMState state, EMEvent evt)
+  {
+    a3.doAction(state, evt);
+  }
+
+  protected void a4(EMState state, EMEvent evt)
+  {
+    a4.doAction(state, evt);
+  }
+
+  protected void a5(EMState state, EMEvent evt)
+  {
+    a5.doAction(state, evt);
+  }
+
+  protected void a6(EMState state, EMEvent evt)
+  {
+    a6.doAction(state, evt);
+  }
+
+  protected void r1(EMState state, EMEvent evt)
+  {
+    r1.doAction(state, evt);
+  }
+
+  protected void r2(EMState state, EMEvent evt)
+  {
+    r2.doAction(state, evt);
+  }
+
+  protected void r3(EMState state, EMEvent evt)
+  {
+    r3.doAction(state, evt);
+  }
+
+  protected void l0(EMState state, EMEvent evt)
+  {
+    l0.doAction(state, evt);
+  }
+
+  EventMachine fsm;
+
+  @Before
+  public void initFsm()
+  {
+    MethodsAsActions call = new MethodsAsActions(this);
     FsmModel model = new FsmModel();
     model.addState("STARTED")
-        .addTransition("R1", "SUCCESS", a1)
-        .addTransition("R2", "FAIL", a2);
+        .addTransition("R1", "SUCCESS", call.action("a1"))
+        .addTransition("R2", "FAIL", call.action("a2"));
     model.addState("DONE")
-        .addTransition("R3", "SUCCESS", a3)
-        .addTransition("R4", "FAIL", a4);
-    model.addState("R1", r1)
+        .addTransition("R3", "SUCCESS", call.action("a3"))
+        .addTransition("R4", "FAIL", call.action("a4"));
+    model.addState("R1", call.action("r1"))
         .addTransition("R2", "SUCCESS")
         .addTransition("R1", "FAIL")
         .addTransition("R3", "TO3");
-    model.addState("R2", r2)
+    model.addState("R2", call.action("r2"))
         .addTransition("R1", "SUCCESS");
-    model.addState("R3", r3);
-    model.setOnStateListeners(l0);
+    model.addState("R3", call.action("r3"));
+    model.setOnStateListeners(call.action("l0"));
     fsm = new EventMachine(model);
   }
 
@@ -83,4 +139,5 @@ public class EventMachineTest
     assertThat(r2.wasInvoked()).isEqualTo(1);
     assertThat(r3.wasInvoked()).isEqualTo(1);
   }
+
 }

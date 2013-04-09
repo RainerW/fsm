@@ -6,15 +6,16 @@ public class EMStateImpl implements EMState
 {
   String _name;
 
-  public EMStateImpl(String stateName)
+  @Override
+  public String getStateMemento()
   {
-    _name = stateName;
+    return _name;
   }
 
   @Override
-  public String getStateName()
+  public void setStateMemento(String data)
   {
-    return _name;
+    _name = data;
   }
 
 }

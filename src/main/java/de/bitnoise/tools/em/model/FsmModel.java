@@ -14,6 +14,7 @@ public class FsmModel
   Map<String, FsmState> states = new HashMap<String, FsmState>();
 
   List<EMAction> _onStateListeners = new ArrayList<EMAction>();
+  List<EMAction> _onTransitionListeners = new ArrayList<EMAction>();
 
   String _startStateName;
 
@@ -62,9 +63,26 @@ public class FsmModel
     }
   }
 
+  public void setOnTransitionListeners(EMAction... actions)
+  {
+    if (actions == null)
+    {
+      _onTransitionListeners = new ArrayList<EMAction>();
+    }
+    else
+    {
+      _onTransitionListeners = Arrays.asList(actions);
+    }
+  }
+
   public List<EMAction> getOnStateListeners()
   {
     return _onStateListeners;
+  }
+
+  public List<EMAction> getOnTransitionListeners()
+  {
+    return _onTransitionListeners;
   }
 
   public String getStartStateName()
