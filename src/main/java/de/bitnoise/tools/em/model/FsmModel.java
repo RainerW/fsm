@@ -90,7 +90,7 @@ public class FsmModel
     return _startStateName;
   }
 
-  public void addErrorHandler(EMErrorHandler errorHandler)
+  public void setErrorHandler(EMErrorHandler errorHandler)
   {
     _errorHandler = errorHandler;
   }
